@@ -1,1 +1,2 @@
 # jem_project
+Code for Jemima Stobart's year 3 Computer Science project. The project is making a task management app that uses image recognition to make sure the user is actually doing the tasks when they take a photo of them doing the task.
