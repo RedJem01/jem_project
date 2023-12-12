@@ -1,54 +1,67 @@
-import matplotlib.pyplot as plotter_lib
-import matplotlib.pyplot as plt
 import numpy as np
-import PIL as image_lib
-import tensorflow as tflow
-from tensorflow.python.keras.layers import Flatten
-from tensorflow.python.keras import Sequential
-from tensorflow.python.keras.layers import Dense
-from tensorflow.python.keras.optimizers import Adam
-import pathlib
+from keras.applications.resnet50 import ResNet50
+from keras.utils import image_dataset_from_directory
+from keras.optimizers import Adam
+from keras.models import Model
+from tensorflow.python.keras.layers import Dense, Flatten, Dropout
+from sklearn import metrics
+import tensorflow as tf
 
-directory = "C:\Users\jemst\Documents\Uni\Year_3\Project\project_dataset"
-data_directory = pathlib.Path(directory)
+NUM_CLASSES = 5
+IMAGE_SIZE = (150, 150)
+BATCH_SIZE = 8
+FREEZE_LAYERS = 2
+NUM_EPOCHS = 10
+WEIGHTS_FINAL = 'modelresnet50.h5'
 
-img_height,img_width=180,180
-batch_size=32
+train_dir = './split_project_dataset/train'
+valid_dir = './split_project_dataset/validation'
 
-train_ds = tflow.keras.preprocessing.image_dataset_from_directory(data_directory, validation_split=0.2, subset="training", seed=123, label_mode='categorical', image_size=(img_height, img_width), batch_size=batch_size)
-validation_ds = tflow.keras.preprocessing.image_dataset_from_directory(data_directory, validation_split=0.2, subset="validation", seed=123, label_mode='categorical', image_size=(img_height, img_width), batch_size=batch_size)
+train_batches = image_dataset_from_directory(
+    directory=train_dir,
+    image_size=IMAGE_SIZE,
+    batch_size=BATCH_SIZE,
+    labels='inferred',
+    label_mode='categorical',
+    class_names=['brushing_teeth', 'cutting_nails', 'doing_laundry', 'folding_clothes', 'washing_dishes'],
+    shuffle=True, 
+    interpolation="bicubic")
 
-plotter_lib.figure(figsize=(10, 10))
-epochs=10
-for images, labels in train_ds.take(1):
-    for var in range(6):
-        ax = plt.subplot(3, 3, var + 1)
-        plotter_lib.imshow(images[var].numpy().astype("uint8"))
-        plotter_lib.axis("off")
+valid_batches = image_dataset_from_directory(
+    directory=valid_dir,
+    image_size=IMAGE_SIZE,
+    batch_size=BATCH_SIZE,
+    labels='inferred',
+    label_mode='categorical',
+    class_names=['brushing_teeth', 'cutting_nails', 'doing_laundry', 'folding_clothes', 'washing_dishes'],
+    shuffle=False, 
+    interpolation="bicubic")
 
-resnet_model = Sequential()
-pretrained_model= tflow.keras.applications.ResNet50(include_top=False, input_shape=(180,180,3), pooling='avg',classes=5, weights='imagenet')
+AUTOTUNE = tf.data.AUTOTUNE
 
-for each_layer in pretrained_model.layers:
-    each_layer.trainable=False
+train_batches = train_batches.cache().prefetch(buffer_size=AUTOTUNE)
+valid_batches = valid_batches.cache().prefetch(buffer_size=AUTOTUNE)
 
-resnet_model.add(pretrained_model)
-resnet_model.add(Flatten())
-resnet_model.add(Dense(512, activation='relu'))
-resnet_model.add(Dense(5, activation='softmax'))
+classify = ResNet50(include_top=False, weights='imagenet', input_tensor=None, input_shape=(IMAGE_SIZE[0], IMAGE_SIZE[1], 3))
+x = classify.output
+x = Flatten()(x)
+x = Dropout(0.5)(x)
+output_layer = Dense(NUM_CLASSES, activation='softmax', name='softmax')(x)
+classify_final = Model(inputs=classify.input, outputs=output_layer)
+for layer in classify_final.layers[:FREEZE_LAYERS]:
+    layer.trainable = False
+for layer in classify_final.layers[FREEZE_LAYERS]:
+    layer.trainable = True
 
-resnet_model.compile(optimizer=Adam(lr=0.001),loss='categorical_crossentropy',metrics=['accuracy'])
-history = resnet_model.fit(train_ds, validation_data=validation_ds, epochs=epochs)
-
-plotter_lib.figure(figsize=(8, 8))
-epochs_range= range(epochs)
-plotter_lib.plot( epochs_range, history.history['accuracy'], label="Training Accuracy")
-plotter_lib.plot(epochs_range, history.history['val_accuracy'], label="Validation Accuracy")
-plotter_lib.axis(ymin=0.4,ymax=1)
-plotter_lib.grid()
-plotter_lib.title('Model Accuracy')
-plotter_lib.ylabel('Accuracy')
-plotter_lib.xlabel('Epochs')
-plotter_lib.legend(['train', 'validation'])
-plotter_lib.show()
-plotter_lib.savefig('output-plot.png') 
+classify_final.summary()
+classify_final.compile(optimizer=Adam(lr=1e-5), loss='categorical_crossentropy', metrics=['accuracy'])
+classify_final.fit_generator(train_batches, steps_per_epoch = train_batches.samples // BATCH_SIZE, validation_data = valid_batches, validation_steps = valid_batches.samples // BATCH_SIZE, epochs = NUM_EPOCHS)
+scores = classify_final.evaluate_generator(valid_batches, steps=1000, verbose=1)
+print('Accuracy is %s' %(scores[1]*100))
+Y_pred = classify_final.predict_generator(valid_batches, steps=19)
+y_pred = np.argmax(Y_pred, axis=1)
+print("Confusion matrix")
+print(metrics.confusion_matrix(valid_batches.classes, y_pred))
+print("Classification report")
+print(metrics.classification_report(valid_batches.classes, y_pred))
+classify_final.save_weights(WEIGHTS_FINAL)
