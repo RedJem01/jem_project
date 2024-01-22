@@ -1,19 +1,14 @@
 import fiftyone as fo
 import fiftyone.zoo as foz
 
+#Code modified from https://docs.voxel51.com/api/fiftyone.zoo.datasets.base.html#fiftyone.zoo.datasets.base.Kinetics400Dataset
+classes = ["brushing teeth"]
 
-name = "project_dataset"
-
-dataset_dir = "C:/Users/jemst/Documents/Uni/Year_3/Project/project_dataset"
-
-dataset_type = fo.types.ImageClassificationDirectoryTree
-
-classes = ['brushing_teeth', 'cutting_nails', 'doing_laundry', 'folding_clothes', 'washing_dishes']
-
-dataset = fo.Dataset.from_dir(
-    dataset_dir=dataset_dir,
-    dataset_type=dataset_type,
-    name=name,
+dataset = foz.load_zoo_dataset(
+    "kinetics-400",
+    splits=["train", "test", "validation"],
+    classes=classes,
+    max_samples=10,
 )
 
 session = fo.launch_app(dataset)

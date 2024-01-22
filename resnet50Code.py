@@ -7,7 +7,7 @@ from keras.layers import Dense, Flatten, Dropout
 from sklearn import metrics
 import tensorflow as tf
 
-#Code adapted from https://medium.com/@codeai99/image-classification-on-cnn-using-resnet50-87d5a336fe4a
+#Code modified from https://medium.com/@codeai99/image-classification-on-cnn-using-resnet50-87d5a336fe4a
 NUM_CLASSES = 5
 IMAGE_SIZE = (150, 150)
 BATCH_SIZE = 8
@@ -43,6 +43,7 @@ model.compile(optimizer=Adam(learning_rate=1e-5), loss='categorical_crossentropy
 
 model.fit(trainDataset, validation_data = valDataset, epochs = NUM_EPOCHS)
 
+#Print out metrics
 scores = model.evaluate(valDataset, verbose=1)
 print('Accuracy is %s' %(scores[1]*100))
 

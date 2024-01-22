@@ -1,4 +1,10 @@
 #:kivy 2.2.1
+#:import MDDropdownMenu kivymd.uix.menu.MDDropdownMenu
+
+<IconListItem>
+    IconLeftWidget:
+        icon: root.icon
+
 MDScreenManager
     id: "screenManager"
     name: "screenManager"
@@ -11,7 +17,31 @@ MDScreenManager
             MDTopAppBar:
                 title: "Tasks"
                 anchor_title: "left"
-                right_action_items: [["plus", lambda x: app.callback(x), "Add task"]]
-                elevation: 10
+                right_action_items: [["plus", lambda x: app.toTaskScreen(x), "Add task"]]
     MDScreen: 
         name: "addTaskScreen"
+        MDBoxLayout:
+            orientation: "vertical"
+            MDTopAppBar:
+                title: "Add Task"
+                anchor_title: "left"
+                right_action_items: [["home", lambda x: app.toHomeScreen(x), "Home"]]
+            MDBoxLayout:
+                padding: [20, 20, 20, 600]
+                size_hint: (1, 0.75)
+                orientation: "vertical"
+                MDLabel:
+                    id: taskToAddQ
+                    text: "Task:"
+                    adaptive_size: True
+                    bold: True
+                MDDropDownItem:
+                    id: taskDropDown
+                    text: "Task"
+                    on_release: app.menu.open()
+                MDRaisedButton:
+                    
+                # MDLabel:
+                #     id: taskToAddQ
+                #     text: "Start time:"
+                #     bold: True
