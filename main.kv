@@ -10,38 +10,88 @@ MDScreenManager
     name: "screenManager"
     MDScreen:
         name: "homeScreen"
-        AnchorLayout:
-            anchor_x: 'center'
-            anchor_y: 'top'
-            orientation: 'vertical'
+        MDBoxLayout:
+            orientation: "vertical"
             MDTopAppBar:
                 title: "Tasks"
                 anchor_title: "left"
-                right_action_items: [["plus", lambda x: app.toTaskScreen(x), "Add task"]]
-    MDScreen: 
+                right_action_items: [["plus", lambda x: app.toTaskScreen(), "Add task"]]
+            MDBoxLayout:
+                id: homeScreenWidgetLayout
+                orientation: "vertical"
+                padding: 20
+                AnchorLayout:
+                    id: noTasksLayout
+                    anchor_x: "center"
+                    anchor_y: "center"
+                    MDLabel:
+                        id: noTasksYet
+                        text: "You have no tasks yet. Click the plus icon in the top right to add a task :)"
+                        adaptive_size: True
+                        bold: True
+    MDScreen:
         name: "addTaskScreen"
         MDBoxLayout:
             orientation: "vertical"
             MDTopAppBar:
                 title: "Add Task"
                 anchor_title: "left"
-                right_action_items: [["home", lambda x: app.toHomeScreen(x), "Home"]]
+                right_action_items: [["home", lambda x: app.toHomeScreen(), "Home"]]
             MDBoxLayout:
                 padding: [20, 20, 20, 600]
                 size_hint: (1, 0.75)
                 orientation: "vertical"
-                MDLabel:
-                    id: taskToAddQ
-                    text: "Task:"
-                    adaptive_size: True
-                    bold: True
-                MDDropDownItem:
-                    id: taskDropDown
-                    text: "Task"
-                    on_release: app.menu.open()
+                MDBoxLayout:
+                    padding: 20
+                    orientation: "horizontal"
+                    MDLabel:
+                        id: taskToAddQ
+                        text: "Task:   "
+                        adaptive_size: True
+                        bold: True
+                    MDDropDownItem:
+                        id: taskDropDown
+                        text: "Brushing teeth"
+                        current_item: "Brushing teeth"
+                        on_release: app.menu.open()
                 MDRaisedButton:
-                    
-                # MDLabel:
-                #     id: taskToAddQ
-                #     text: "Start time:"
-                #     bold: True
+                    id: doneButton
+                    text: "Done"
+                    on_release: app.setTask()
+    MDScreen:
+        name: "cameraScreen"
+        MDBoxLayout:
+            id: cameraScreenLayout
+            orientation: "vertical"
+            MDTopAppBar:
+                title: "Camera"
+                anchor_title: "left"
+                right_action_items: [["home", lambda x: app.toHomeScreen(), "Home"]]
+            Camera:
+                id: camera
+                resolution: (640, 480)
+                allow_stretch: True
+                keep_ratio: True
+                play: True
+            AnchorLayout:
+                anchor_x: "center"
+                anchor_y: "bottom"
+                MDIconButton:
+                    id: captureButton
+                    icon: "camera"
+                    on_release: app.capture()
+    MDScreen:
+        name: "imageScreen"
+        BoxLayout:
+            id: imageLayout
+            orientation: "vertical"
+            Image:
+                id: takenImage
+            MDIconButton:
+                id: acceptImageButton
+                icon: "check"
+                on_release: app.acceptImage()
+            MDIconButton:
+                id: deleteImageButton
+                icon: "delete"
+                on_release: app.deleteImage()
