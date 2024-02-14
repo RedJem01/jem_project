@@ -70,28 +70,33 @@ MDScreenManager
             Camera:
                 id: camera
                 resolution: (640, 480)
-                allow_stretch: True
                 keep_ratio: True
                 play: True
-            AnchorLayout:
-                anchor_x: "center"
-                anchor_y: "bottom"
-                MDIconButton:
-                    id: captureButton
-                    icon: "camera"
-                    on_release: app.capture()
+        AnchorLayout:
+            id: camerScreenAncLayout
+            anchor_x: "center"
+            anchor_y: "bottom"
+            MDIconButton:
+                id: captureButton
+                icon: "camera"
+                on_release: app.capture()
     MDScreen:
         name: "imageScreen"
-        BoxLayout:
+        FloatLayout:
             id: imageLayout
             orientation: "vertical"
-            Image:
-                id: takenImage
+            MDTopAppBar:
+                title: "Check image"
+                anchor_title: "left"
+                pos_hint: {"y": .9}
+                right_action_items: [["home", lambda x: app.toHomeScreen(), "Home"]]
             MDIconButton:
                 id: acceptImageButton
                 icon: "check"
+                pos_hint: {"x": .4, "y": .05}
                 on_release: app.acceptImage()
             MDIconButton:
                 id: deleteImageButton
                 icon: "delete"
+                pos_hint: {"x": .5, "y": .05}
                 on_release: app.deleteImage()
