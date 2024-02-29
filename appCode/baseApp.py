@@ -17,6 +17,7 @@ from kivymd.uix.anchorlayout import AnchorLayout
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDFlatButton, MDIconButton
 from kivy.uix.image import Image
+from kivymd.uix.pickers import MDDatePicker, MDTimePicker
 
 #Needed for MDDropdownMenu
 class IconListItem(OneLineIconListItem):
@@ -26,18 +27,23 @@ class MainApp(MDApp):
     sameTaskDialog = None
     doneTaskDialog = None
     failedTaskDialog = None
+
     classes = ["brushing_teeth", "cutting_nails", "doing_laundry", "folding_clothes", "washing_dishes"]
+
     currentTaskString = None
     currentTaskCard = None
+
+    cardDate = None
+
     model = None
 
     def build(self):
         #Set colours for app
         self.theme_cls.theme_style = "Dark"
         self.theme_cls.primary_palette = "Red"
-        
+
         self.model = load_model("./model.h5")
-        
+
         #Set tasks items for drop down menu
         taskItems = [{"viewclass": "IconListItem", "text": "Brushing teeth", "on_release": lambda x="Brushing teeth": self.setItem(x)}, {"viewclass": "IconListItem", "text": "Cutting nails", "on_release": lambda x="Cutting nails": self.setItem(x)}, {"viewclass": "IconListItem", "text": "Doing laundry", "on_release": lambda x="Doing laundry": self.setItem(x)}, {"viewclass": "IconListItem", "text": "Folding clothes", "on_release": lambda x="Folding clothes": self.setItem(x)}, {"viewclass": "IconListItem", "text": "Washing dishes", "on_release": lambda x="Washing dishes": self.setItem(x)}]
 
@@ -51,8 +57,8 @@ class MainApp(MDApp):
         self.deleteButton = MDIconButton(icon="delete", on_release=self.deleteTask)
 
         #Make task label to the left top of the card
-        self.labelAnchor = AnchorLayout(anchor_x="left", anchor_y="top")
-        self.cardLabel = MDLabel(height=50)
+        self.taskLabelAnchor = AnchorLayout(anchor_x="left", anchor_y="top")
+        self.cardTaskLabel = MDLabel(height=50)
 
         #Make no tasks message to home screen
         self.noTasksAnchor =  AnchorLayout(anchor_x="center", anchor_y="center")
@@ -60,7 +66,7 @@ class MainApp(MDApp):
 
         #Get camera object
         self.camera = self.root.ids.camera
-        
+
         #Make drop down menu
         self.menu = MDDropdownMenu(
             caller=self.root.ids.taskDropDown,
@@ -68,6 +74,14 @@ class MainApp(MDApp):
             position="center"
         )
         self.menu.bind()
+
+        # #Make date picker
+        # self.dateDialog = MDDatePicker()
+        # self.dateDialog.bind(on_save=self.onDateSave, on_cancel=self.onDateCancel)
+
+        # #Make time picker
+        # self.timeDialog = MDTimePicker()
+        # self.timeDialog.bind(time=self.getTime)
 
 
 
@@ -115,12 +129,12 @@ class MainApp(MDApp):
         #Check if no tasks anchor layout is still on the screen and remove if it is
         if (type(self.root.ids.homeScreenWidgetLayout.children[0]) == AnchorLayout):
             self.root.ids.homeScreenWidgetLayout.remove_widget(self.root.ids.homeScreenWidgetLayout.children[0])
-        
+
         #Make id for task card based on task string e.g. card_Brushing_teeth
         splitTask = taskString.split()
         cardId = "card_" + splitTask[0] + "_" + splitTask[1]
         cameraButtonId = "button_" + splitTask[0] + "_" + splitTask[1]
-        
+
         #Loop through children in home screen layout and check if task already exists
         for child in self.root.ids.homeScreenWidgetLayout.children:
             #If task exists then open a dialog box that says it already exists
@@ -133,13 +147,13 @@ class MainApp(MDApp):
 
         self.deleteAnchor.add_widget(self.deleteButton)
 
-        self.cardLabel.text = taskString
-        self.labelAnchor.add_widget(self.cardLabel)
+        self.cardTaskLabel.text = taskString
+        self.taskLabelAnchor.add_widget(self.cardTaskLabel)
 
         #Add card with above widgets ^^^^
-        self.root.ids.homeScreenWidgetLayout.add_widget(MDCard(self.labelAnchor, self.cameraAnchor, self.deleteAnchor, id=cardId, padding=20))
+        self.root.ids.homeScreenWidgetLayout.add_widget(MDCard(self.taskLabelAnchor, self.cameraAnchor, self.deleteAnchor, id=cardId, padding=20))
         self.toHomeScreen()
-        
+
     def setCurrentTask(self, instance):
         buttonId = instance.id
         splitId = buttonId.split("_")
@@ -168,7 +182,7 @@ class MainApp(MDApp):
 
     def closeSameTaskDialog(self, ah):
         self.sameTaskDialog.dismiss(force=True)
-        
+
     def openDoneTaskDialog(self):
         #Check if dialog exists
         if not self.doneTaskDialog:
@@ -196,6 +210,26 @@ class MainApp(MDApp):
 
 
 
+    #############Time#############
+    #Commented out for if I want to add later
+    # def showDatePicker(self):
+    #     self.dateDialog.open()
+
+    # def onDateSave(self, instance, value, date_range):
+    #     self.cardDate = value
+
+    # def onDateCancel(self, instance, value):
+    #     pass
+
+    # def showTimePicker(self):
+    #     self.timeDialog.open()
+
+    # def getTime(self, instance, time):
+    #     return time
+
+
+
+
 
     #############Camera#############
     def capture(self):
@@ -215,9 +249,10 @@ class MainApp(MDApp):
         x = preprocess_input(x)
         x = np.expand_dims(x, axis=0)
         pred = self.model.predict(x)[0]
-        maxPosition=np.argmax(pred) 
-        predClass = self.classes[maxPosition]
+        predClass = self.classes[np.argmax(pred)]
         lowerCurrentTaskString = self.currentTaskString.lower()
+        print(predClass)
+        print(lowerCurrentTaskString)
         if (predClass == lowerCurrentTaskString):
             self.root.ids.homeScreenWidgetLayout.remove_widget(self.currentTaskCard)
             self.openDoneTaskDialog()

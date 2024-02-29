@@ -38,8 +38,7 @@ MDScreenManager
                 anchor_title: "left"
                 right_action_items: [["home", lambda x: app.toHomeScreen(), "Home"]]
             MDBoxLayout:
-                padding: [20, 20, 20, 600]
-                size_hint: (1, 0.75)
+                padding: 20
                 orientation: "vertical"
                 MDBoxLayout:
                     padding: 20
@@ -54,6 +53,30 @@ MDScreenManager
                         text: "Brushing teeth"
                         current_item: "Brushing teeth"
                         on_release: app.menu.open()
+                # MDBoxLayout:
+                #     orientation: "horizontal"
+                #     padding: 20
+                #     MDLabel:
+                #         id: dateLabel
+                #         text: "Date:   "
+                #         adaptive_size: True
+                #         bold: True
+                #     MDRaisedButton:
+                #         text: "Open date picker"
+                #         pos_hint: {'center_x': .5, 'center_y': .5}
+                #         on_release: app.showDatePicker()
+                # MDBoxLayout:
+                #     orientation: "horizontal"
+                #     padding: 20
+                #     MDLabel:
+                #         id: timeLabel
+                #         text: "Time:   "
+                #         adaptive_size: True
+                #         bold: True
+                #     MDRaisedButton:
+                #         text: "Open time picker"
+                #         pos_hint: {'center_x': .5, 'center_y': .5}
+                #         on_release: app.showTimePicker()
                 MDRaisedButton:
                     id: doneButton
                     text: "Done"
