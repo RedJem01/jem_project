@@ -17,7 +17,6 @@ from kivymd.uix.anchorlayout import AnchorLayout
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDFlatButton, MDIconButton
 from kivy.uix.image import Image
-from kivymd.uix.pickers import MDDatePicker, MDTimePicker
 
 #Needed for MDDropdownMenu
 class IconListItem(OneLineIconListItem):
@@ -42,10 +41,7 @@ class MainApp(MDApp):
         self.theme_cls.theme_style = "Dark"
         self.theme_cls.primary_palette = "Red"
 
-        self.model = load_model("./model.h5")
-
-        #Set tasks items for drop down menu
-        taskItems = [{"viewclass": "IconListItem", "text": "Brushing teeth", "on_release": lambda x="Brushing teeth": self.setItem(x)}, {"viewclass": "IconListItem", "text": "Cutting nails", "on_release": lambda x="Cutting nails": self.setItem(x)}, {"viewclass": "IconListItem", "text": "Doing laundry", "on_release": lambda x="Doing laundry": self.setItem(x)}, {"viewclass": "IconListItem", "text": "Folding clothes", "on_release": lambda x="Folding clothes": self.setItem(x)}, {"viewclass": "IconListItem", "text": "Washing dishes", "on_release": lambda x="Washing dishes": self.setItem(x)}]
+        self.model = load_model(".\\appCode\\newModel.h5")
 
         #Load all widgets up front to stop app slowing down in app
         #Make camera button in the left center of the card
@@ -63,9 +59,9 @@ class MainApp(MDApp):
         #Make no tasks message to home screen
         self.noTasksAnchor =  AnchorLayout(anchor_x="center", anchor_y="center")
         self.noTasksLabel = MDLabel(id="noTasksYet", text="You have no tasks yet. Click the plus icon in the top right to add a task :)", adaptive_size=True, bold=True)
-
-        #Get camera object
-        self.camera = self.root.ids.camera
+        
+        #Set tasks items for drop down menu
+        taskItems = [{"viewclass": "IconListItem", "text": "Brushing teeth", "on_release": lambda x="Brushing teeth": self.setItem(x)}, {"viewclass": "IconListItem", "text": "Cutting nails", "on_release": lambda x="Cutting nails": self.setItem(x)}, {"viewclass": "IconListItem", "text": "Doing laundry", "on_release": lambda x="Doing laundry": self.setItem(x)}, {"viewclass": "IconListItem", "text": "Folding clothes", "on_release": lambda x="Folding clothes": self.setItem(x)}, {"viewclass": "IconListItem", "text": "Washing dishes", "on_release": lambda x="Washing dishes": self.setItem(x)}]
 
         #Make drop down menu
         self.menu = MDDropdownMenu(
@@ -74,14 +70,6 @@ class MainApp(MDApp):
             position="center"
         )
         self.menu.bind()
-
-        # #Make date picker
-        # self.dateDialog = MDDatePicker()
-        # self.dateDialog.bind(on_save=self.onDateSave, on_cancel=self.onDateCancel)
-
-        # #Make time picker
-        # self.timeDialog = MDTimePicker()
-        # self.timeDialog.bind(time=self.getTime)
 
 
 
@@ -210,26 +198,6 @@ class MainApp(MDApp):
 
 
 
-    #############Time#############
-    #Commented out for if I want to add later
-    # def showDatePicker(self):
-    #     self.dateDialog.open()
-
-    # def onDateSave(self, instance, value, date_range):
-    #     self.cardDate = value
-
-    # def onDateCancel(self, instance, value):
-    #     pass
-
-    # def showTimePicker(self):
-    #     self.timeDialog.open()
-
-    # def getTime(self, instance, time):
-    #     return time
-
-
-
-
 
     #############Camera#############
     def capture(self):
@@ -237,6 +205,8 @@ class MainApp(MDApp):
         timeStr = time.strftime("%Y%m%d_%H%M%S")
         #Set file name with current time
         fileName = "IMG_{}.png".format(timeStr)
+        #Get camera object
+        self.camera = self.root.ids.camera
         #Save image to takenImages folder
         self.camera.export_to_png(".\\takenImages\\{}".format(fileName))
         #Go to image screen

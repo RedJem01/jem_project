@@ -1,0 +1,105 @@
+#:kivy 2.2.1
+#:import MDDropdownMenu kivymd.uix.menu.MDDropdownMenu
+
+<IconListItem>
+    IconLeftWidget:
+        icon: root.icon
+
+MDScreenManager
+    id: "screenManager"
+    name: "screenManager"
+    MDScreen:
+        id: "homeScreen"
+        name: "homeScreen"
+        MDBoxLayout:
+            orientation: "vertical"
+            MDTopAppBar:
+                title: "Tasks"
+                anchor_title: "left"
+                right_action_items: [["plus", lambda x: app.toTaskScreen(), "Add task"], ["close", lambda x: app.stop(), "Exit app"]]
+            MDBoxLayout:
+                id: homeScreenWidgetLayout
+                orientation: "vertical"
+                padding: 20
+                AnchorLayout:
+                    id: noTasksLayout
+                    anchor_x: "center"
+                    anchor_y: "center"
+                    MDLabel:
+                        id: noTasksYet
+                        text: "You have no tasks yet. Click the plus icon in the top right to add a task :)"
+                        adaptive_size: True
+                        bold: True
+    MDScreen:
+        id: "addTaskScreen"
+        name: "addTaskScreen"
+        MDBoxLayout:
+            orientation: "vertical"
+            MDTopAppBar:
+                title: "Add Task"
+                anchor_title: "left"
+                right_action_items: [["home", lambda x: app.toHomeScreen(), "Home"], ["close", lambda x: app.stop(), "Exit app"]]
+            MDBoxLayout:
+                padding: 20
+                orientation: "vertical"
+                MDBoxLayout:
+                    padding: 20
+                    orientation: "horizontal"
+                    MDLabel:
+                        id: taskToAddQ
+                        text: "Task:   "
+                        adaptive_size: True
+                        bold: True
+                    MDDropDownItem:
+                        id: taskDropDown
+                        text: "Brushing teeth"
+                        current_item: "Brushing teeth"
+                        on_release: app.menu.open()
+                MDRaisedButton:
+                    id: doneButton
+                    text: "Done"
+                    on_release: app.setTask()
+    MDScreen:
+        id: "cameraScreen"
+        name: "cameraScreen"
+        MDBoxLayout:
+            id: cameraScreenLayout
+            orientation: "vertical"
+            MDTopAppBar:
+                title: "Camera"
+                anchor_title: "left"
+                right_action_items: [["home", lambda x: app.toHomeScreen(), "Home"], ["close", lambda x: app.stop(), "Exit app"]]
+            Camera:
+                id: camera
+                resolution: (640, 480)
+                keep_ratio: True
+                play: True
+        AnchorLayout:
+            id: camerScreenAncLayout
+            anchor_x: "center"
+            anchor_y: "bottom"
+            MDIconButton:
+                id: captureButton
+                icon: "camera"
+                on_release: app.capture()
+    MDScreen:
+        id: "imageScreen"
+        name: "imageScreen"
+        FloatLayout:
+            id: imageLayout
+            orientation: "vertical"
+            MDTopAppBar:
+                title: "Check image"
+                anchor_title: "left"
+                pos_hint: {"y": .9}
+                right_action_items: [["home", lambda x: app.toHomeScreen(), "Home"], ["close", lambda x: app.stop(), "Exit app"]]
+            MDIconButton:
+                id: acceptImageButton
+                icon: "check"
+                pos_hint: {"x": .4, "y": .05}
+                on_release: app.acceptImage()
+            MDIconButton:
+                id: deleteImageButton
+                icon: "delete"
+                pos_hint: {"x": .5, "y": .05}
+                on_release: app.deleteImage()
